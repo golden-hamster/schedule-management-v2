@@ -1,7 +1,6 @@
 package com.nbcam.schedule_management_v2.dto.response;
 
 import com.nbcam.schedule_management_v2.entity.Schedule;
-import com.nbcam.schedule_management_v2.entity.User;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +19,7 @@ public class ScheduleResponse {
 
     private String modifiedAt;
 
-    private String name;
+    private String username;
 
     public static ScheduleResponse from(Schedule schedule) {
         return ScheduleResponse.builder()
@@ -28,7 +27,7 @@ public class ScheduleResponse {
                 .content(schedule.getContent())
                 .createdAt(schedule.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
                 .modifiedAt(schedule.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
-                .name(schedule.getUser().getName())
+                .username(schedule.getUser().getName())
                 .build();
     }
 }

@@ -29,16 +29,12 @@ public class User {
 
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private List<Schedule> schedule = new ArrayList<>();
-
     @Builder
-    private User(String name, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password, List<Schedule> schedule) {
+    private User(String name, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password) {
         this.name = name;
         this.email = email;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
         this.password = password;
-        this.schedule = schedule;
     }
 }
