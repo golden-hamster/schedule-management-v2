@@ -8,6 +8,8 @@ import com.nbcam.schedule_management_v2.entity.User;
 import com.nbcam.schedule_management_v2.repository.ScheduleRepository;
 import com.nbcam.schedule_management_v2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,10 @@ public class ScheduleService {
     public ScheduleResponse findScheduleById(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
         return ScheduleResponse.from(schedule);
+    }
+
+    public Page<ScheduleResponse> findSchedules(Pageable pageable) {
+        return scheduleRepository.findAll(pageable).map(ScheduleResponse::from);
     }
 
     @Transactional
