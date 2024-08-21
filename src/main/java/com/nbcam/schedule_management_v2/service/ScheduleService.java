@@ -57,6 +57,14 @@ public class ScheduleService {
         schedule.updateModifiedAt(LocalDateTime.now());
     }
 
+    @Transactional
+    public void deleteSchedule(Long scheduleId, Long userId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
+        User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        validateAuthor(schedule, user);
+        scheduleRepository.delete(schedule);
+    }
+
     public void validateAuthor(Schedule schedule, User user) {
         if (!schedule.getUser().equals(user)) {
             throw new RuntimeException();

@@ -28,7 +28,7 @@ public class Schedule {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "schedule")
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comment = new ArrayList<>();
 
     @Builder
