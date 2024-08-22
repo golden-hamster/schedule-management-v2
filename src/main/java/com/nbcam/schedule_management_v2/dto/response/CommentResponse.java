@@ -20,7 +20,7 @@ public class CommentResponse {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
                 .modifiedAt(comment.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
-                .username(comment.getUser().getName())
+                .username(comment.getUser().getUsername())
                 .build();
     }
 }
