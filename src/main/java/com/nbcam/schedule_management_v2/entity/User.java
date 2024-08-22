@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -19,7 +17,7 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
-    private String name;
+    private String username;
 
     private String email;
 
@@ -30,11 +28,27 @@ public class User {
     private String password;
 
     @Builder
-    private User(String name, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password) {
-        this.name = name;
+    private User(String username, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password) {
+        this.username = username;
         this.email = email;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
         this.password = password;
+    }
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateModifiedAt(LocalDateTime modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }
