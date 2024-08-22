@@ -2,6 +2,7 @@ package com.nbcam.schedule_management_v2.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,4 +21,9 @@ public class ScheduleUser {
     @ManyToOne(fetch = FetchType.LAZY)
     private Schedule schedule;
 
+    @Builder
+    private ScheduleUser(User user, Schedule schedule) {
+        this.user = user;
+        this.schedule = schedule;
+    }
 }

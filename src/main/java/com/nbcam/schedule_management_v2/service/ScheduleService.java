@@ -4,8 +4,10 @@ import com.nbcam.schedule_management_v2.dto.request.ScheduleCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.ScheduleResponse;
 import com.nbcam.schedule_management_v2.entity.Schedule;
+import com.nbcam.schedule_management_v2.entity.ScheduleUser;
 import com.nbcam.schedule_management_v2.entity.User;
 import com.nbcam.schedule_management_v2.repository.ScheduleRepository;
+import com.nbcam.schedule_management_v2.repository.ScheduleUserRepository;
 import com.nbcam.schedule_management_v2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,6 +25,7 @@ public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
+    private final ScheduleUserRepository scheduleUserRepository;
 
     @Transactional
     public Long createSchedule(ScheduleCreateRequest scheduleCreateRequest) {
@@ -35,12 +39,18 @@ public class ScheduleService {
                 .user(user)
                 .build();
 
+        List<User> managers = scheduleCreateRequest.getManagerIdList().stream().map(userId -> userRepository.findById(userId).orElseThrow(RuntimeException::new)).toList();
+        List<ScheduleUser> scheduleUsers = managers.stream().map(manager -> ScheduleUser.builder().schedule(schedule).user(manager).build()).toList();
+        scheduleUserRepository.saveAll(scheduleUsers);
+
         return scheduleRepository.save(schedule).getId();
     }
 
     public ScheduleResponse findScheduleById(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
-        return ScheduleResponse.from(schedule);
+        List<ScheduleUser> scheduleUserList = scheduleUserRepository.findByScheduleId(scheduleId);
+        List<User> managers = scheduleUserList.stream().map(ScheduleUser::getUser).toList();
+        return ScheduleResponse.from(schedule, managers);
     }
 
     public Page<ScheduleResponse> findSchedules(Pageable pageable) {
@@ -55,6 +65,11 @@ public class ScheduleService {
         schedule.updateTitle(scheduleUpdateRequest.getTitle());
         schedule.updateContent(scheduleUpdateRequest.getContent());
         schedule.updateModifiedAt(LocalDateTime.now());
+
+        scheduleUserRepository.deleteByScheduleId(scheduleId);
+        List<User> managers = scheduleUpdateRequest.getManagerIdList().stream().map(userId -> userRepository.findById(userId).orElseThrow(RuntimeException::new)).toList();
+        List<ScheduleUser> scheduleUsers = managers.stream().map(manager -> ScheduleUser.builder().schedule(schedule).user(manager).build()).toList();
+        scheduleUserRepository.saveAll(scheduleUsers);
     }
 
     @Transactional
@@ -62,6 +77,7 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
         User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
         validateAuthor(schedule, user);
+        scheduleUserRepository.deleteByScheduleId(scheduleId);
         scheduleRepository.delete(schedule);
     }
 
