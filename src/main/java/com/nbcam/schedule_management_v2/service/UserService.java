@@ -1,5 +1,8 @@
 package com.nbcam.schedule_management_v2.service;
 
+import com.nbcam.schedule_management_v2.auth.JwtUtil;
+import com.nbcam.schedule_management_v2.config.PasswordEncoder;
+import com.nbcam.schedule_management_v2.dto.request.LoginRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserDeleteRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserUpdateRequest;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional
@@ -19,18 +23,35 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public Long saveUser(UserCreateRequest userCreateRequest) {
+        String email = userCreateRequest.getEmail();
+        String password = passwordEncoder.encode(userCreateRequest.getPassword());
+
+        Optional<User> checkEmail = userRepository.findByEmail(email);
+        if (checkEmail.isPresent()) {
+            throw new RuntimeException("중복된 사용자가 존재합니다.");
+        }
+
         User user = User.builder()
                 .username(userCreateRequest.getUsername())
                 .email(userCreateRequest.getEmail())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
-                .password(userCreateRequest.getPassword())
+                .password(password)
                 .build();
 
         return userRepository.save(user).getId();
+    }
+
+    public UserResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(RuntimeException::new);
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+        return UserResponse.from(user);
     }
 
     public UserResponse findUserById(Long userId) {

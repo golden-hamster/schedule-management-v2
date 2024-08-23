@@ -1,11 +1,14 @@
 package com.nbcam.schedule_management_v2.controller;
 
+import com.nbcam.schedule_management_v2.auth.JwtUtil;
+import com.nbcam.schedule_management_v2.dto.request.LoginRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserDeleteRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.UserListResponse;
 import com.nbcam.schedule_management_v2.dto.response.UserResponse;
 import com.nbcam.schedule_management_v2.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +22,13 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping
-    public ResponseEntity<Void> createUser(@RequestBody UserCreateRequest userCreateRequest) {
+    @PostMapping()
+    public ResponseEntity<Void> createUser(@RequestBody UserCreateRequest userCreateRequest, HttpServletResponse res) {
         Long userId = userService.saveUser(userCreateRequest);
+        String token = jwtUtil.createToken(String.valueOf(userId));
+        jwtUtil.addJwtToHeader(token, res);
         return ResponseEntity.created(URI.create("/api/users/" + userId)).build();
     }
 
