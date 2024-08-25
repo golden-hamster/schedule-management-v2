@@ -8,6 +8,7 @@ import com.nbcam.schedule_management_v2.dto.request.UserDeleteRequest;
 import com.nbcam.schedule_management_v2.dto.request.UserUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.UserResponse;
 import com.nbcam.schedule_management_v2.entity.User;
+import com.nbcam.schedule_management_v2.exception.AuthenticationException;
 import com.nbcam.schedule_management_v2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,9 +48,9 @@ public class UserService {
     }
 
     public UserResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(RuntimeException::new);
+        User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(AuthenticationException::new);
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
         }
         return UserResponse.from(user);
     }

@@ -1,10 +1,13 @@
 package com.nbcam.schedule_management_v2.auth;
 
+import com.nbcam.schedule_management_v2.exception.AuthenticationException;
+import com.nbcam.schedule_management_v2.exception.TokenNotFoundException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.Key;
 import java.util.Base64;
@@ -53,21 +57,6 @@ public class JwtUtil {
                         .compact();
     }
 
-    // JWT Cookie 에 저장
-    public void addJwtToCookie(String token, HttpServletResponse res) {
-        try {
-            token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
-
-            Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token); // Name-Value
-            cookie.setPath("/");
-
-            // Response 객체에 Cookie 추가
-            res.addCookie(cookie);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException();
-        }
-    }
-
     // JWT 를 HTTP 헤더에 추가
     public void addJwtToHeader(String token, HttpServletResponse res) {
         res.setHeader(AUTHORIZATION_HEADER, token);
@@ -76,9 +65,9 @@ public class JwtUtil {
     // JWT 토큰 substring
     public String substringToken(String tokenValue) {
         if (StringUtils.hasText(tokenValue) && tokenValue.startsWith(BEARER_PREFIX)) {
-            return tokenValue.substring(7);
+            return tokenValue.substring(BEARER_PREFIX.length()).trim();
         }
-        throw new NullPointerException("Not Found Token");
+        throw new IllegalArgumentException("Not Found Token");
     }
 
     // 토큰 검증
@@ -101,5 +90,17 @@ public class JwtUtil {
     // 토큰에서 사용자 정보 가져오기
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    }
+
+    public String getTokenFromRequest(HttpServletRequest req) {
+        String token = req.getHeader(AUTHORIZATION_HEADER);
+        if (token != null) {
+            try{
+                return URLDecoder.decode(token, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

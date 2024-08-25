@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 @Builder(access = AccessLevel.PRIVATE)
 @Getter
 public class UserResponse {
+    private Long userId;
     private String username;
     private String email;
     private String createdAt;
@@ -17,6 +18,7 @@ public class UserResponse {
 
     public static UserResponse from(User user) {
         return UserResponse.builder()
+                .userId(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
