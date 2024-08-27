@@ -22,21 +22,16 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     @PostMapping()
     public ResponseEntity<Void> createUser(@RequestBody UserCreateRequest userCreateRequest, HttpServletResponse response) {
-        Long userId = userService.saveUser(userCreateRequest);
-        String token = jwtUtil.createToken(String.valueOf(userId));
-        jwtUtil.addJwtToHeader(token, response);
+        Long userId = userService.saveUser(userCreateRequest, response);
         return ResponseEntity.created(URI.create("/api/users/" + userId)).build();
     }
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        UserResponse userResponse = userService.login(loginRequest);
-        String token = jwtUtil.createToken(String.valueOf(userResponse.getUserId()));
-        jwtUtil.addJwtToHeader(token, response);
+        UserResponse userResponse = userService.login(loginRequest, response);
         return ResponseEntity.ok(userResponse);
     }
 

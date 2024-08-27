@@ -1,5 +1,7 @@
 package com.nbcam.schedule_management_v2.controller;
 
+import com.nbcam.schedule_management_v2.auth.AuthInfo;
+import com.nbcam.schedule_management_v2.auth.Login;
 import com.nbcam.schedule_management_v2.dto.request.CommentCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.CommentUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.CommentListResponse;
@@ -20,8 +22,8 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/schedules/{scheduleId}/comments")
-    public ResponseEntity<Void> createComment(@PathVariable Long scheduleId, @RequestBody CommentCreateRequest commentCreateRequest) {
-        Long commentId = commentService.saveComment(scheduleId, commentCreateRequest);
+    public ResponseEntity<Void> createComment(@PathVariable Long scheduleId, @RequestBody CommentCreateRequest commentCreateRequest, @Login AuthInfo authInfo) {
+        Long commentId = commentService.saveComment(scheduleId, commentCreateRequest, authInfo);
         return ResponseEntity.created(URI.create("/api/comments/" + commentId)).build();
     }
 
@@ -38,14 +40,14 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<Void> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest) {
-        commentService.updateComment(commentId, commentUpdateRequest);
+    public ResponseEntity<Void> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequest commentUpdateRequest, @Login AuthInfo authInfo) {
+        commentService.updateComment(commentId, commentUpdateRequest, authInfo);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @RequestParam Long userId) {
-        commentService.deleteComment(commentId, userId);
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @Login AuthInfo authInfo) {
+        commentService.deleteComment(commentId, authInfo);
         return ResponseEntity.noContent().build();
     }
 }

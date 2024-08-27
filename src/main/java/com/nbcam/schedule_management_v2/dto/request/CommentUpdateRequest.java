@@ -5,5 +5,4 @@ import lombok.Getter;
 @Getter
 public class CommentUpdateRequest {
     private String content;
-    private Long userId;
 }

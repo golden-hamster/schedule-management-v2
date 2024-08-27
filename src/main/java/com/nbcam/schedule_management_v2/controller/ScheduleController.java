@@ -1,5 +1,7 @@
 package com.nbcam.schedule_management_v2.controller;
 
+import com.nbcam.schedule_management_v2.auth.AuthInfo;
+import com.nbcam.schedule_management_v2.auth.Login;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.ScheduleListResponse;
@@ -23,8 +25,8 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<Void> createSchedule(@RequestBody ScheduleCreateRequest scheduleCreateRequest) {
-        Long scheduleId = scheduleService.createSchedule(scheduleCreateRequest);
+    public ResponseEntity<Void> createSchedule(@RequestBody ScheduleCreateRequest scheduleCreateRequest, @Login AuthInfo authInfo) {
+        Long scheduleId = scheduleService.createSchedule(scheduleCreateRequest, authInfo);
         return ResponseEntity.created(URI.create("/api/schedules" + scheduleId)).build();
     }
 
@@ -34,7 +36,7 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleResponse);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<ScheduleListResponse> findSchedules(
             @PageableDefault(size = 10, sort = "modifiedAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<ScheduleResponse> schedules = scheduleService.findSchedules(pageable);
@@ -42,14 +44,14 @@ public class ScheduleController {
     }
 
     @PutMapping("/{scheduleId}")
-    public ResponseEntity<Void> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleUpdateRequest scheduleUpdateRequest) {
-        scheduleService.updateSchedule(scheduleId, scheduleUpdateRequest);
+    public ResponseEntity<Void> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleUpdateRequest scheduleUpdateRequest, @Login AuthInfo authInfo) {
+        scheduleService.updateSchedule(scheduleId, scheduleUpdateRequest, authInfo);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId, @RequestParam Long userId) {
-        scheduleService.deleteSchedule(scheduleId, userId);
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId, @Login AuthInfo authInfo) {
+        scheduleService.deleteSchedule(scheduleId, authInfo);
         return ResponseEntity.noContent().build();
     }
 }

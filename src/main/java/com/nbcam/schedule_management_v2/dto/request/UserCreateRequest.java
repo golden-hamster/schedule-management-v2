@@ -7,4 +7,6 @@ public class UserCreateRequest {
     private String username;
     private String email;
     private String password;
+    private boolean admin;
+    private String adminToken;
 }

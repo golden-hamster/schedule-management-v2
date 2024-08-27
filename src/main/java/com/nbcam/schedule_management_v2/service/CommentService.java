@@ -1,5 +1,6 @@
 package com.nbcam.schedule_management_v2.service;
 
+import com.nbcam.schedule_management_v2.auth.AuthInfo;
 import com.nbcam.schedule_management_v2.dto.request.CommentCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.CommentUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.CommentResponse;
@@ -26,10 +27,10 @@ public class CommentService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long saveComment(Long scheduleId,CommentCreateRequest commentCreateRequest) {
+    public Long saveComment(Long scheduleId, CommentCreateRequest commentCreateRequest, AuthInfo authInfo) {
 
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
-        User user = userRepository.findById(commentCreateRequest.getUserId()).orElseThrow(RuntimeException::new);
+        User user = userRepository.findById(authInfo.getUserId()).orElseThrow(RuntimeException::new);
 
         Comment comment = Comment.builder()
                 .content(commentCreateRequest.getContent())
@@ -52,18 +53,18 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment(Long commentId, CommentUpdateRequest commentUpdateRequest) {
+    public void updateComment(Long commentId, CommentUpdateRequest commentUpdateRequest, AuthInfo authInfo) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(RuntimeException::new);
-        User user = userRepository.findById(commentUpdateRequest.getUserId()).orElseThrow(RuntimeException::new);
+        User user = userRepository.findById(authInfo.getUserId()).orElseThrow(RuntimeException::new);
         validateAuthor(comment, user);
         comment.updateContent(commentUpdateRequest.getContent());
         comment.updateModifiedAt(LocalDateTime.now());
     }
 
     @Transactional
-    public void deleteComment(Long commentId, Long userId) {
+    public void deleteComment(Long commentId, AuthInfo authInfo) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(RuntimeException::new);
-        User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
+        User user = userRepository.findById(authInfo.getUserId()).orElseThrow(RuntimeException::new);
         validateAuthor(comment, user);
         commentRepository.delete(comment);
     }

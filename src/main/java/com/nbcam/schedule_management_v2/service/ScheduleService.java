@@ -1,11 +1,14 @@
 package com.nbcam.schedule_management_v2.service;
 
+import com.nbcam.schedule_management_v2.auth.AuthInfo;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.ScheduleResponse;
+import com.nbcam.schedule_management_v2.entity.Role;
 import com.nbcam.schedule_management_v2.entity.Schedule;
 import com.nbcam.schedule_management_v2.entity.ScheduleUser;
 import com.nbcam.schedule_management_v2.entity.User;
+import com.nbcam.schedule_management_v2.exception.AdminRequiredException;
 import com.nbcam.schedule_management_v2.repository.ScheduleRepository;
 import com.nbcam.schedule_management_v2.repository.ScheduleUserRepository;
 import com.nbcam.schedule_management_v2.repository.UserRepository;
@@ -28,8 +31,8 @@ public class ScheduleService {
     private final ScheduleUserRepository scheduleUserRepository;
 
     @Transactional
-    public Long createSchedule(ScheduleCreateRequest scheduleCreateRequest) {
-        User user = userRepository.findById(scheduleCreateRequest.getUserId()).orElseThrow(RuntimeException::new);
+    public Long createSchedule(ScheduleCreateRequest scheduleCreateRequest, AuthInfo authInfo) {
+        User user = userRepository.findById(authInfo.getUserId()).orElseThrow(RuntimeException::new);
 
         Schedule schedule = Schedule.builder()
                 .title(scheduleCreateRequest.getTitle())
@@ -58,10 +61,9 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void updateSchedule(Long scheduleId, ScheduleUpdateRequest scheduleUpdateRequest) {
+    public void updateSchedule(Long scheduleId, ScheduleUpdateRequest scheduleUpdateRequest, AuthInfo authInfo) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
-        User user = userRepository.findById(scheduleUpdateRequest.getUserId()).orElseThrow(RuntimeException::new);
-        validateAuthor(schedule, user);
+        validateRole(authInfo);
         schedule.updateTitle(scheduleUpdateRequest.getTitle());
         schedule.updateContent(scheduleUpdateRequest.getContent());
         schedule.updateModifiedAt(LocalDateTime.now());
@@ -73,17 +75,16 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void deleteSchedule(Long scheduleId, Long userId) {
+    public void deleteSchedule(Long scheduleId, AuthInfo authInfo) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(RuntimeException::new);
-        User user = userRepository.findById(userId).orElseThrow(RuntimeException::new);
-        validateAuthor(schedule, user);
+        validateRole(authInfo);
         scheduleUserRepository.deleteByScheduleId(scheduleId);
         scheduleRepository.delete(schedule);
     }
 
-    public void validateAuthor(Schedule schedule, User user) {
-        if (!schedule.getUser().equals(user)) {
-            throw new RuntimeException();
+    public void validateRole(AuthInfo authInfo) {
+        if (authInfo.getRole() != Role.ADMIN) {
+            throw new AdminRequiredException();
         }
     }
 }

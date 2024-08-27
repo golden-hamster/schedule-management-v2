@@ -8,6 +8,5 @@ import java.util.List;
 public class ScheduleUpdateRequest {
     private String title;
     private String content;
-    private Long userId;
     private List<Long> managerIdList;
 }
