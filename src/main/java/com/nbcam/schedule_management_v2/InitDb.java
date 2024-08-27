@@ -1,5 +1,6 @@
 package com.nbcam.schedule_management_v2;
 
+import com.nbcam.schedule_management_v2.entity.Role;
 import com.nbcam.schedule_management_v2.entity.Schedule;
 import com.nbcam.schedule_management_v2.entity.ScheduleUser;
 import com.nbcam.schedule_management_v2.entity.User;
@@ -28,6 +29,7 @@ public class InitDb {
                     .createdAt(LocalDateTime.now())
                     .modifiedAt(LocalDateTime.now())
                     .password("비밀번호입니다.")
+                    .role(Role.USER)
                     .build();
             em.persist(user);
 
