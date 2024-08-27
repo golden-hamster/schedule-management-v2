@@ -14,6 +14,8 @@ import java.util.List;
 @Getter
 public class ScheduleResponse {
 
+    private Long scheduleId;
+
     private String title;
 
     private String content;
@@ -28,8 +30,9 @@ public class ScheduleResponse {
 
     private List<Manager> managers;
 
-    public static ScheduleResponse from(Schedule schedule, List<User> managers) {
+    public static ScheduleResponse from(Schedule schedule, List<User> managers) { // 단건 조회
         return ScheduleResponse.builder()
+                .scheduleId(schedule.getId())
                 .title(schedule.getTitle())
                 .content(schedule.getContent())
                 .createdAt(schedule.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
@@ -40,8 +43,9 @@ public class ScheduleResponse {
                 .build();
     }
 
-    public static ScheduleResponse from(Schedule schedule) {
+    public static ScheduleResponse from(Schedule schedule) { // 여러 건 조회
         return ScheduleResponse.builder()
+                .scheduleId(schedule.getId())
                 .title(schedule.getTitle())
                 .content(schedule.getContent())
                 .createdAt(schedule.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
