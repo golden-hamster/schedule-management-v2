@@ -27,13 +27,17 @@ public class User {
 
     private String password;
 
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
     @Builder
-    private User(String username, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password) {
+    private User(String username, String email, LocalDateTime createdAt, LocalDateTime modifiedAt, String password, Role role) {
         this.username = username;
         this.email = email;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
         this.password = password;
+        this.role = role;
     }
 
     public void updateUsername(String username) {
