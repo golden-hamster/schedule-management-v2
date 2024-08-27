@@ -40,16 +40,18 @@ public class AuthFilter extends OncePerRequestFilter {
 
                 if (!jwtUtil.validateToken(token)) {
                     setErrorResponse(response, ErrorCode.INVALID_TOKEN);
+                    return;
                 }
 
-                Claims info = jwtUtil.getUserInfoFromToken(token);
-
-                User user = userRepository.findByEmail(info.getSubject()).orElseThrow(() -> new RuntimeException("Not Found Error"));
-
+                AuthInfo authInfo = jwtUtil.getAuthInfoFromToken(token);
+                User user = userRepository.findById(authInfo.getUserId()).orElseThrow(() -> new RuntimeException("User Not Found Error"));
                 request.setAttribute("user", user);
             } else {
                 setErrorResponse(response, ErrorCode.TOKEN_NOT_FOUND);
+                return;
             }
+
+            chain.doFilter(request, response);
         }
     }
 
