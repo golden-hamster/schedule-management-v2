@@ -1,12 +1,10 @@
 package com.nbcam.schedule_management_v2.auth;
 
-import com.nbcam.schedule_management_v2.exception.AuthenticationException;
-import com.nbcam.schedule_management_v2.exception.TokenNotFoundException;
+import com.nbcam.schedule_management_v2.entity.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +14,6 @@ import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -45,12 +42,14 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String userId) {
+    public String createToken(AuthInfo authInfo) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(userId) // 사용자 식별자값(ID)
+                        .claim("userId", authInfo.getUserId())
+                        .claim("email", authInfo.getEmail())
+                        .claim(AUTHORIZATION_KEY, authInfo.getRole())
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
                         .setIssuedAt(date) // 발급일
                         .signWith(key, signatureAlgorithm) // 암호화 알고리즘
@@ -87,9 +86,17 @@ public class JwtUtil {
         return false;
     }
 
-    // 토큰에서 사용자 정보 가져오기
-    public Claims getUserInfoFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+    public AuthInfo getAuthInfoFromToken(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Long userId = claims.get("userId", Long.class);
+        String email = claims.get("email", String.class);
+        String role = claims.get(AUTHORIZATION_KEY, String.class);
+
+        return AuthInfo.builder()
+                .userId(userId)
+                .email(email)
+                .role(Role.valueOf(role))
+                .build();
     }
 
     public String getTokenFromRequest(HttpServletRequest req) {
