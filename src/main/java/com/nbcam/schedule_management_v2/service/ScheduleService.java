@@ -4,6 +4,7 @@ import com.nbcam.schedule_management_v2.auth.AuthInfo;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleCreateRequest;
 import com.nbcam.schedule_management_v2.dto.request.ScheduleUpdateRequest;
 import com.nbcam.schedule_management_v2.dto.response.ScheduleResponse;
+import com.nbcam.schedule_management_v2.dto.response.WeatherResponse;
 import com.nbcam.schedule_management_v2.entity.Role;
 import com.nbcam.schedule_management_v2.entity.Schedule;
 import com.nbcam.schedule_management_v2.entity.ScheduleUser;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -29,16 +32,27 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final UserRepository userRepository;
     private final ScheduleUserRepository scheduleUserRepository;
+    private final WeatherService weatherService;
 
     @Transactional
     public Long createSchedule(ScheduleCreateRequest scheduleCreateRequest, AuthInfo authInfo) {
         User user = userRepository.findById(authInfo.getUserId()).orElseThrow(RuntimeException::new);
+
+        List<WeatherResponse> weatherData = weatherService.getWeatherData();
+
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd"));
+        String weatherToday = weatherData.stream()
+                .filter(weather -> weather.getDate().equals(today))
+                .map(WeatherResponse::getWeather)
+                .findFirst()
+                .orElse("Unknown");  // 해당 날짜의 날씨가 없을 경우 처리
 
         Schedule schedule = Schedule.builder()
                 .title(scheduleCreateRequest.getTitle())
                 .content(scheduleCreateRequest.getContent())
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
+                .weather(weatherToday)
                 .user(user)
                 .build();
 

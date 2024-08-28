@@ -28,6 +28,8 @@ public class ScheduleResponse {
 
     private String email;
 
+    private String weather;
+
     private List<Manager> managers;
 
     public static ScheduleResponse from(Schedule schedule, List<User> managers) { // 단건 조회
@@ -39,6 +41,7 @@ public class ScheduleResponse {
                 .modifiedAt(schedule.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
                 .username(schedule.getUser().getUsername())
                 .email(schedule.getUser().getEmail())
+                .weather(schedule.getWeather())
                 .managers(managers.stream().map(Manager::from).toList())
                 .build();
     }
@@ -50,6 +53,7 @@ public class ScheduleResponse {
                 .content(schedule.getContent())
                 .createdAt(schedule.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
                 .modifiedAt(schedule.getModifiedAt().format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
+                .weather(schedule.getWeather())
                 .build();
     }
 }

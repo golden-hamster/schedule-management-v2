@@ -24,6 +24,8 @@ public class Schedule {
 
     private LocalDateTime modifiedAt;
 
+    private String weather;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -32,11 +34,12 @@ public class Schedule {
     private List<Comment> comment = new ArrayList<>();
 
     @Builder
-    private Schedule(String title, String content, LocalDateTime createdAt, LocalDateTime modifiedAt, User user) {
+    private Schedule(String title, String content, LocalDateTime createdAt, LocalDateTime modifiedAt, String weather, User user) {
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
+        this.weather = weather;
         this.user = user;
     }
 
